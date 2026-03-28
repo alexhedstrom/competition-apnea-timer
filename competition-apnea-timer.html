@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Competition Apnea Timer — STA Breath Hold Stopwatch for Freediving</title>
+
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Free online competition apnea timer for static apnea (STA) breath hold timing. Track breath hold, surface protocol, and card times with a session log. Built for freedivers and competition judges.">
+    <meta name="keywords" content="apnea timer, freediving timer, static apnea, STA timer, breath hold timer, competition apnea, surface protocol timer, freediving stopwatch, breath hold training, AIDA competition timer">
+    <meta name="author" content="Alex Hedström">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://apneatimer.app/">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Competition Apnea Timer — STA Breath Hold Stopwatch">
+    <meta property="og:description" content="Free online competition apnea timer for static apnea (STA). Track breath hold, surface protocol, and card times with a persistent session log.">
+    <meta property="og:url" content="https://apneatimer.app/">
+    <meta property="og:site_name" content="Competition Apnea Timer">
+    <meta property="og:locale" content="en_US">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Competition Apnea Timer — STA Breath Hold Stopwatch">
+    <meta name="twitter:description" content="Free online competition apnea timer for static apnea (STA). Track breath hold, surface protocol, and card times with a persistent session log.">
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Competition Apnea Timer",
+        "description": "A specialized stopwatch timer for competition apnea timing (STA) with breath hold, surface protocol, and card tracking.",
+        "url": "https://apneatimer.app/",
+        "applicationCategory": "SportsApplication",
+        "operatingSystem": "Any",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Alex Hedström",
+            "url": "https://apneatimer.app"
+        }
+    }
+    </script>
+
+    <style>
+        /* Reset */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f6fc;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Competition Apnea Timer Styles */
+        .cat-timer-wrapper {
+            --cat-bg-color: #ffffff;
+            --cat-text-color: #333333;
+            --cat-btn-color: #0073aa;
+            --cat-btn-text-color: #ffffff;
+            --cat-border-color: #e2e4e7;
+            --cat-border-radius: 12px;
+            --cat-btn-color-start: #28a745;
+            --cat-btn-color-stop: #dc3545;
+            --cat-btn-color-card: #0073aa;
+            --cat-btn-color-reset: #6c757d;
+
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .cat-timer {
+            background-color: var(--cat-bg-color);
+            color: var(--cat-text-color);
+            padding: 30px;
+            border-radius: var(--cat-border-radius);
+            border: 1px solid var(--cat-border-color);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .cat-timers-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .cat-timer-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .cat-timer-label {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--cat-text-color);
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .cat-timer-display {
+            font-size: 80px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+        }
+
+        .cat-timer-display-small {
+            font-size: 40px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            line-height: 1;
+            color: var(--cat-text-color);
+        }
+
+        .cat-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .cat-btn {
+            background-color: var(--cat-btn-color);
+            color: var(--cat-btn-text-color);
+            border: none;
+            padding: 0;
+            font-size: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s;
+            font-weight: 700;
+            min-width: 220px;
+            min-height: 220px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            margin: 0 auto;
+        }
+
+        .cat-btn.cat-state-running {
+            background-color: var(--cat-btn-color-start);
+        }
+
+        .cat-btn.cat-state-sp {
+            background-color: var(--cat-btn-color-stop);
+        }
+
+        .cat-btn.cat-state-card {
+            background-color: var(--cat-btn-color-card);
+        }
+
+        .cat-btn.cat-state-stopped {
+            background-color: var(--cat-btn-color-reset);
+        }
+
+        .cat-btn:hover {
+            transform: scale(1.05);
+            opacity: 1;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+        }
+
+        .cat-btn:active {
+            transform: scale(0.95);
+            opacity: 0.9;
+        }
+
+        .cat-log-container {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding-top: 30px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .cat-log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .cat-timer .cat-log-header h3 {
+            margin: 0;
+            font-size: 16px;
+            color: var(--cat-text-color) !important;
+            opacity: 0.9;
+            line-height: 1.4;
+            font-weight: 700;
+        }
+
+        .cat-btn-small {
+            background: transparent;
+            border: 1px solid currentColor;
+            color: var(--cat-text-color);
+            font-size: 12px;
+            padding: 3px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        .cat-confirm-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            font-size: 13px;
+            color: #664d03;
+        }
+
+        .cat-confirm-bar.active {
+            display: flex;
+        }
+
+        .cat-confirm-bar span {
+            flex: 1;
+        }
+
+        .cat-confirm-bar button {
+            border: none;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .cat-confirm-yes {
+            background: #dc3545;
+            color: #fff;
+        }
+
+        .cat-confirm-no {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        .cat-log-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .cat-timer .cat-log-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            font-size: 14px;
+            color: var(--cat-text-color) !important;
+            margin: 0;
+            list-style-type: none;
+            line-height: 1.5;
+        }
+
+        .cat-log-list li:last-child {
+            border-bottom: none;
+        }
+
+        .cat-log-label {
+            font-weight: 500;
+            opacity: 0.8;
+        }
+
+        .cat-log-time {
+            font-weight: 600;
+        }
+
+        .cat-version {
+            margin-top: 20px;
+            font-size: 10px;
+            opacity: 0.5;
+            text-align: center;
+        }
+
+        .cat-page-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .cat-headline {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1d2327;
+            text-align: center;
+            margin: 30px 0 0;
+        }
+
+        .cat-footer {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            padding: 15px 0 30px;
+            text-transform: uppercase;
+        }
+
+        @media screen and (max-width: 600px) {
+            body {
+                align-items: flex-start;
+            }
+
+            .cat-timer-wrapper {
+                width: auto;
+                align-self: stretch;
+                padding: 0 15px;
+            }
+
+            .cat-timer {
+                padding: 15px;
+                max-width: 100%;
+                border-radius: 10px;
+            }
+
+            .cat-timer-display {
+                font-size: 62px;
+            }
+
+            .cat-timer-display-small {
+                font-size: 42px;
+            }
+
+            .cat-btn {
+                min-width: 180px;
+                min-height: 180px;
+                font-size: 24px;
+            }
+
+            .cat-timer-block {
+                margin-bottom: 15px;
+                width: 100%;
+            }
+
+            .cat-timer-label {
+                font-size: 12px;
+                margin-bottom: 2px;
+            }
+
+            .cat-timer .cat-log-list li {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            .cat-timer .cat-log-list li span {
+                display: block;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cat-page-wrapper">
+    <h1 class="cat-headline">Apnea Timer</h1>
+    <div class="cat-timer-wrapper">
+        <div id="cat-timer-app" class="cat-timer">
+            <div class="cat-timers-container">
+                <!-- HOLD Timer (Main) -->
+                <div class="cat-timer-block cat-timer-hold">
+                    <span class="cat-timer-label">BREATH HOLD</span>
+                    <div class="cat-timer-display" id="cat-display-hold">00:00:00</div>
+                </div>
+
+                <!-- SP Timer (Secondary) -->
+                <div class="cat-timer-block cat-timer-sp">
+                    <span class="cat-timer-label">SURFACE PROTOCOL</span>
+                    <div class="cat-timer-display-small" id="cat-display-sp">00:00:00</div>
+                </div>
+
+                <!-- CARD Timer (Tertiary) -->
+                <div class="cat-timer-block cat-timer-card">
+                    <span class="cat-timer-label">CARD</span>
+                    <div class="cat-timer-display-small" id="cat-display-card">00:00:00</div>
+                </div>
+            </div>
+
+            <div class="cat-controls">
+                <button id="cat-action-btn" class="cat-btn">START</button>
+            </div>
+            <div class="cat-log-container">
+                <div class="cat-log-header">
+                    <h3>Session Log</h3>
+                    <button id="cat-clear-log-btn" class="cat-btn-small">Clear Log</button>
+                </div>
+                <div id="cat-confirm-bar" class="cat-confirm-bar">
+                    <span>Clear all sessions?</span>
+                    <button id="cat-confirm-yes" class="cat-confirm-yes">Yes</button>
+                    <button id="cat-confirm-no" class="cat-confirm-no">No</button>
+                </div>
+                <ul id="cat-log-list" class="cat-log-list">
+                    <!-- Log items will be injected here -->
+                </ul>
+            </div>
+            <div class="cat-version">v1.0.0</div>
+        </div>
+    </div>
+    <footer class="cat-footer">&copy; 2026 <a href="https://alexhedstrom.com" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline;">Alex Hedström</a> &bull; All rights reserved.</footer>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const STATE = {
+            IDLE: 0,
+            HOLD_RUNNING: 1,
+            SP_CARD_RUNNING: 2,
+            CARD_RUNNING: 3,
+            STOPPED: 4
+        };
+
+        let currentState = STATE.IDLE;
+
+        let holdInterval = null;
+        let spInterval = null;
+        let cardInterval = null;
+
+        let holdStartTime = 0;
+        let spStartTime = 0;
+        let cardStartTime = 0;
+
+        let holdDuration = 0;
+        let spDuration = 0;
+        let cardDuration = 0;
+
+        const displayHold = document.getElementById('cat-display-hold');
+        const displaySp = document.getElementById('cat-display-sp');
+        const displayCard = document.getElementById('cat-display-card');
+
+        const actionBtn = document.getElementById('cat-action-btn');
+        const logList = document.getElementById('cat-log-list');
+        const clearLogBtn = document.getElementById('cat-clear-log-btn');
+
+        if (logList) {
+            loadLog();
+        }
+
+        if (actionBtn) {
+            actionBtn.addEventListener('click', handleAction);
+        }
+        if (clearLogBtn) {
+            clearLogBtn.addEventListener('click', clearLog);
+        }
+
+        function handleAction() {
+            const now = Date.now();
+
+            switch (currentState) {
+                case STATE.IDLE:
+                    startHoldTimer(now);
+                    currentState = STATE.HOLD_RUNNING;
+                    if (actionBtn) {
+                        actionBtn.textContent = 'STOP';
+                        actionBtn.className = 'cat-btn cat-state-running';
+                    }
+                    break;
+
+                case STATE.HOLD_RUNNING:
+                    stopHoldTimer(now);
+                    startSpTimer(now);
+                    startCardTimer(now);
+
+                    currentState = STATE.SP_CARD_RUNNING;
+                    if (actionBtn) {
+                        actionBtn.textContent = 'STOP SP';
+                        actionBtn.className = 'cat-btn cat-state-sp';
+                    }
+                    break;
+
+                case STATE.SP_CARD_RUNNING:
+                    stopSpTimer(now);
+
+                    currentState = STATE.CARD_RUNNING;
+                    if (actionBtn) {
+                        actionBtn.textContent = 'STOP TIMER';
+                        actionBtn.className = 'cat-btn cat-state-card';
+                    }
+                    break;
+
+                case STATE.CARD_RUNNING:
+                    stopCardTimer(now);
+
+                    currentState = STATE.STOPPED;
+                    if (actionBtn) {
+                        actionBtn.textContent = 'RESET';
+                        actionBtn.className = 'cat-btn cat-state-stopped';
+                    }
+
+                    logSession(holdDuration, spDuration, cardDuration);
+                    break;
+
+                case STATE.STOPPED:
+                    resetAll();
+                    break;
+            }
+        }
+
+        function startHoldTimer(timestamp) {
+            const el = document.getElementById('cat-display-hold');
+
+            holdStartTime = timestamp;
+            if (holdInterval) clearInterval(holdInterval);
+            holdInterval = setInterval(function () {
+                const current = Date.now();
+                if (el) updateDisplay(el, current - holdStartTime);
+            }, 10);
+        }
+
+        function stopHoldTimer(timestamp) {
+            if (holdInterval) clearInterval(holdInterval);
+            holdDuration = timestamp - holdStartTime;
+            const el = document.getElementById('cat-display-hold');
+            if (el) updateDisplay(el, holdDuration);
+        }
+
+        function startSpTimer(timestamp) {
+            const el = document.getElementById('cat-display-sp');
+            spStartTime = timestamp;
+            if (spInterval) clearInterval(spInterval);
+            spInterval = setInterval(function () {
+                const current = Date.now();
+                if (el) updateDisplay(el, current - spStartTime);
+            }, 10);
+        }
+
+        function stopSpTimer(timestamp) {
+            if (spInterval) clearInterval(spInterval);
+            spDuration = timestamp - spStartTime;
+            const el = document.getElementById('cat-display-sp');
+            if (el) updateDisplay(el, spDuration);
+        }
+
+        function startCardTimer(timestamp) {
+            const el = document.getElementById('cat-display-card');
+            cardStartTime = timestamp;
+            if (cardInterval) clearInterval(cardInterval);
+            cardInterval = setInterval(function () {
+                const current = Date.now();
+                if (el) updateDisplay(el, current - cardStartTime);
+            }, 10);
+        }
+
+        function stopCardTimer(timestamp) {
+            if (cardInterval) clearInterval(cardInterval);
+            cardDuration = timestamp - cardStartTime;
+            const el = document.getElementById('cat-display-card');
+            if (el) updateDisplay(el, cardDuration);
+        }
+
+        function resetAll() {
+            if (holdInterval) clearInterval(holdInterval);
+            if (spInterval) clearInterval(spInterval);
+            if (cardInterval) clearInterval(cardInterval);
+
+            currentState = STATE.IDLE;
+
+            if (displayHold) updateDisplay(displayHold, 0);
+            if (displaySp) updateDisplay(displaySp, 0);
+            if (displayCard) updateDisplay(displayCard, 0);
+
+            if (actionBtn) {
+                actionBtn.textContent = 'START';
+                actionBtn.className = 'cat-btn';
+            }
+
+            holdDuration = 0;
+            spDuration = 0;
+            cardDuration = 0;
+        }
+
+        function updateDisplay(element, ms) {
+            element.textContent = formatTime(ms);
+        }
+
+        function formatTime(ms) {
+            const date = new Date(ms);
+            const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+            const seconds = date.getUTCSeconds().toString().padStart(2, '0');
+            const milliseconds = Math.floor(date.getUTCMilliseconds() / 10).toString().padStart(2, '0');
+            return minutes + ':' + seconds + ':' + milliseconds;
+        }
+
+        function logSession(t1, t2, t3) {
+            const session = {
+                id: Date.now(),
+                date: new Date().toLocaleTimeString([], { hour12: false }),
+                timerHold: t1,
+                timerSp: t2,
+                timerCard: t3
+            };
+
+            let logs = getLogs();
+            logs.unshift(session);
+            saveLogs(logs);
+            renderLogItem(session);
+        }
+
+        function getLogs() {
+            const logs = localStorage.getItem('cat_logs');
+            return logs ? JSON.parse(logs) : [];
+        }
+
+        function saveLogs(logs) {
+            localStorage.setItem('cat_logs', JSON.stringify(logs));
+        }
+
+        function loadLog() {
+            if (!logList) return;
+            logList.innerHTML = '';
+            const logs = getLogs();
+            logs.forEach(function (session) { renderLogItem(session); });
+        }
+
+        function renderLogItem(session) {
+            if (!logList) return;
+
+            const tHold = formatTime(session.timerHold || session.timer1 || 0);
+            const tSp = formatTime(session.timerSp || session.timer2 || 0);
+
+            const li = document.createElement('li');
+            li.style.fontWeight = 'bold';
+
+            li.innerHTML =
+                '<span class="cat-log-label">TIME: ' + session.date + '</span>' +
+                '<span class="cat-log-time">HOLD: ' + tHold + ' | SP: ' + tSp + '</span>';
+
+            logList.appendChild(li);
+        }
+
+        var confirmBar = document.getElementById('cat-confirm-bar');
+        var confirmYes = document.getElementById('cat-confirm-yes');
+        var confirmNo = document.getElementById('cat-confirm-no');
+
+        function clearLog() {
+            if (confirmBar) confirmBar.classList.add('active');
+        }
+
+        if (confirmYes) {
+            confirmYes.addEventListener('click', function () {
+                localStorage.removeItem('cat_logs');
+                if (logList) logList.innerHTML = '';
+                resetAll();
+                if (confirmBar) confirmBar.classList.remove('active');
+            });
+        }
+
+        if (confirmNo) {
+            confirmNo.addEventListener('click', function () {
+                if (confirmBar) confirmBar.classList.remove('active');
+            });
+        }
+    });
+    </script>
+
+</body>
+</html>
